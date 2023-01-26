@@ -1,68 +1,121 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useReducer } from 'react';
 
 import { Card } from '../UI/Card/Card';
 import { Button } from '../UI/Button/Button';
 import { Actions, Controls } from './Login.styled';
 
+const emailReducer = (prevState, action) => {
+  if (action.type === 'USER_INPUT') {
+    return {
+      value: action.value,
+      isValid: action.value.includes('@'),
+    };
+  }
+  if (action.type === 'INPUT_BLUR') {
+    return {
+      value: prevState.value,
+      isValid: prevState.value.includes('@'),
+    };
+  }
+  return {
+    value: '',
+    isValid: false,
+  };
+};
+
+const passwordReducer = (prevState, action) => {
+  if (action.type === 'USER_INPUT') {
+    return {
+      value: action.value,
+      isValid: action.value.trim().length > 7,
+    };
+  }
+  if (action.type === 'INPUT_BLUR') {
+    return {
+      value: prevState.value,
+      isValid: prevState.value.trim().length > 7,
+    };
+  }
+  return {
+    value: '',
+    isValid: false,
+  };
+};
+
 export const Login = ({ onLogin }) => {
-  const [inputEmail, setInputEmail] = useState('');
-  const [emailIsValid, setEmailIsValid] = useState();
-  const [inputPassword, setInputPassword] = useState('');
-  const [passwordIsValid, setPasswordIsValid] = useState();
+  const [emailState, dispatchEmailState] = useReducer(emailReducer, {
+    value: '',
+    isValid: undefined,
+  });
+
+  const [passwordState, dispatchPasswordState] = useReducer(passwordReducer, {
+    value: '',
+    isValid: undefined,
+  });
+
   const [formIsValid, setFormIsValid] = useState(false);
+
+  const { isValid: emailIsValid } = emailState;
+  const { isValid: passwordIsValid } = passwordState;
 
   useEffect(() => {
     const timerId = setTimeout(() => {
-      setFormIsValid(
-        inputEmail.includes('@') && inputPassword.trim().length > 6
-      );
+      setFormIsValid(emailIsValid && passwordIsValid);
     }, 500);
 
     return () => {
       clearTimeout(timerId);
     };
-  }, [inputEmail, inputPassword]);
+  }, [emailIsValid, passwordIsValid]);
 
   const emailChangeHandler = event => {
-    setInputEmail(event.target.value);
+    dispatchEmailState({ type: 'USER_INPUT', value: event.target.value });
+
+    // setFormIsValid(emailState.isValid && passwordState.isValid);
   };
 
   const passwordChangeHandler = event => {
-    setInputPassword(event.target.value);
+    dispatchPasswordState({ type: 'USER_INPUT', value: event.target.value });
+
+    // setFormIsValid(passwordState.isValid && emailState.isValid);
   };
 
   const validateEmailHandler = () => {
-    setEmailIsValid(inputEmail.includes('@'));
+    dispatchEmailState({ type: 'INPUT_BLUR' });
   };
 
   const validatePasswordHandler = () => {
-    setPasswordIsValid(inputPassword.trim().length > 6);
+    dispatchPasswordState({ type: 'INPUT_BLUR' });
   };
 
   const submitHandler = event => {
     event.preventDefault();
-    onLogin(inputEmail, inputPassword);
+    onLogin(emailState.value, passwordState.value);
   };
 
   return (
     <Card className="login">
       <form onSubmit={submitHandler}>
-        <Controls className={`${emailIsValid === false ? 'invalid' : ''}`}>
+        <Controls
+          className={`${emailState.isValid === false ? 'invalid' : ''}`}
+        >
           <label htmlFor="email">Email</label>
           <input
             type="email"
             id="email"
-            value={inputEmail}
+            value={emailState.value}
             onChange={emailChangeHandler}
             onBlur={validateEmailHandler}
           />
         </Controls>
-        <Controls className={`${passwordIsValid === false ? 'invalid' : ''}`}>
+        <Controls
+          className={`${passwordState.isValid === false ? 'invalid' : ''}`}
+        >
           <label htmlFor="password">Пароль</label>
           <input
             type="password"
             id="password"
-            value={inputPassword}
+            value={passwordState.value}
             onChange={passwordChangeHandler}
             onBlur={validatePasswordHandler}
           />
