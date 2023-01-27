@@ -70,14 +70,10 @@ export const Login = ({ onLogin }) => {
 
   const emailChangeHandler = event => {
     dispatchEmailState({ type: 'USER_INPUT', value: event.target.value });
-
-    // setFormIsValid(emailState.isValid && passwordState.isValid);
   };
 
   const passwordChangeHandler = event => {
     dispatchPasswordState({ type: 'USER_INPUT', value: event.target.value });
-
-    // setFormIsValid(passwordState.isValid && emailState.isValid);
   };
 
   const validateEmailHandler = () => {
