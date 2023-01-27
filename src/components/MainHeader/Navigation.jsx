@@ -2,7 +2,7 @@ import React, { useContext } from 'react';
 import { AuthContext } from 'store/auth-context';
 import { NavWrapper } from './Navigation.styled';
 
-export const Navigation = ({ onLogout }) => {
+export const Navigation = props => {
   const ctx = useContext(AuthContext);
   return (
     <NavWrapper>
@@ -19,7 +19,7 @@ export const Navigation = ({ onLogout }) => {
         )}
         {ctx.isLoggedIn && (
           <li>
-            <button onClick={onLogout}>Выйти</button>
+            <button onClick={ctx.onLogout}>Выйти</button>
           </li>
         )}
       </ul>
