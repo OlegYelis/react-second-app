@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useReducer, useContext } from 'react';
+import React, {
+  useState,
+  useEffect,
+  useReducer,
+  useContext,
+  useRef,
+} from 'react';
 
 import { Card } from '../UI/Card/Card';
 import { Button } from '../UI/Button/Button';
@@ -62,6 +68,9 @@ export const Login = props => {
 
   const ctx = useContext(AuthContext);
 
+  const emailInputRef = useRef();
+  const passwordInputRef = useRef();
+
   useEffect(() => {
     const timerId = setTimeout(() => {
       setFormIsValid(emailIsValid && passwordIsValid);
@@ -90,13 +99,21 @@ export const Login = props => {
 
   const submitHandler = event => {
     event.preventDefault();
-    ctx.onLogin(emailState.value, passwordState.value);
+
+    if (formIsValid) {
+      ctx.onLogin(emailState.value, passwordState.value);
+    } else if (!emailIsValid) {
+      emailInputRef.current.focus();
+    } else {
+      passwordInputRef.current.focus();
+    }
   };
 
   return (
     <Card className="login">
       <form onSubmit={submitHandler}>
         <Input
+          ref={emailInputRef}
           isValid={emailIsValid}
           label="Email"
           type="email"
@@ -106,6 +123,7 @@ export const Login = props => {
           onBlur={validateEmailHandler}
         />
         <Input
+          ref={passwordInputRef}
           isValid={passwordIsValid}
           label="Password"
           type="password"
@@ -115,9 +133,7 @@ export const Login = props => {
           onBlur={validatePasswordHandler}
         />
         <Actions>
-          <Button type="submit" disabled={!formIsValid}>
-            Вход
-          </Button>
+          <Button type="submit">Вход</Button>
         </Actions>
       </form>
     </Card>
